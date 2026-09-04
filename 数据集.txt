@@ -1,0 +1,14 @@
+ . 智能工厂自动化数据集
+名称：Industrial Smart Factory Automation Dataset 2026
+
+链接：https://www.kaggle.com/datasets/rauffauzanrambe/industrial-smart-factory-automation-dataset-2026
+
+格式：CSV / Parquet（26列，约46MB）
+
+说明：模拟智能工厂的自动化数据
+ IoT云监控数据集
+名称：Smart Manufacturing IoT-Cloud Monitoring Dataset
+
+链接：https://www.kaggle.com/datasets/ziya07/smart-manufacturing-iot-cloud-monitoring-dataset
+
+说明：包含温度、振动、湿度、压力、能耗等传感器数据，带维护预测标签，共10万条记录
