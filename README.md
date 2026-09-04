@@ -1,108 +1,229 @@
-# manufacture-intelligent-course-design
-制造智能技术课程设计，基于Vibe‑Coding开发工业场景智能应用，包含前端、后端、数据库、算法模块；课程设计全部源码、prompt日志、过程文档
-# 制造智能课程设计
+# 基于检索增强生成的大模型智能问答系统
 
-制造智能技术课程设计，基于Vibe-Coding开发工业场景智能应用，包含前端、后端、数据库、算法模块；课程设计全部源码、prompt日志、过程文档
-# 制造智能课程设计：基于机器视觉的工件表面缺陷检测系统
+> 制造智能课程设计项目 · 2026年秋季学期
 
-运用 Vibe Coding 开发方法，实现的一套 B/S 架构可运行 Demo 系统。系统面向制造业产品质量检测环节，围绕「数据采集 - 缺陷识别 - 结果展示 - 持续优化」全业务链条，验证制造智能技术在视觉质检场景的落地应用。
 
-## 项目概况
+## 项目简介
 
-- **拟定题目**：制造智能课程设计：基于机器视觉的工件表面缺陷检测系统
-- **技术方向**：工业大数据预处理与特征工程、制造过程质量智能检测与控制、制造工艺追溯与参数优化（覆盖《制造智能技术》课程 3 个核心专题）
-- **架构**：前端展示层（Vue3 + Element Plus + ECharts）/ 后端服务层（FastAPI）/ 算法引擎层（scikit-learn）/ 数据存储层（MySQL + SQLite）
-- **核心功能**：图像数据上传 → 缺陷智能检测（2 类状态：合格/缺陷）→ 检测结果展示 → 质量统计追溯 → 检测参数优化
+本项目是一个基于**检索增强生成（RAG）** 技术的大模型智能问答系统，面向制造智能课程学习场景开发。系统以课程教材、教学讲义、校园规章制度等文档构建领域知识库，结合大语言模型实现准确、完整、可追溯的自然语言问答。
+
+**核心价值**：通过检索增强生成技术，使大模型能够在回答问题时引用外部知识库，显著提升回答的准确性与可解释性，同时实现答案溯源——每个回答均可追溯到原始文档。
+
 
 ## 项目结构
+manufacturing-rag-qa/
+│
+├── README.md # 项目说明文档（本文件）
+│
+├── src/ # 源代码目录
+│ ├── data_loader/ # 数据加载模块
+│ │ ├── init.py
+│ │ └── loader.py # 多格式文档加载器（PDF/Word/TXT/Markdown）
+│ │
+│ ├── preprocessor/ # 数据预处理模块
+│ │ ├── init.py
+│ │ ├── cleaner.py # 文本清洗（去重/去噪/纠错）
+│ │ ├── splitter.py # 文档分块（chunking）
+│ │ └── standardizer.py # 格式标准化（JSON+UTF-8）
+│ │
+│ ├── embedding/ # 向量化模块
+│ │ ├── init.py
+│ │ └── embedder.py # 嵌入模型封装（调用GTE/API）
+│ │
+│ ├── retriever/ # 检索模块
+│ │ ├── init.py
+│ │ ├── vector_store.py # 向量数据库操作（ChromaDB/FAISS）
+│ │ └── search.py # 语义相似度检索
+│ │
+│ ├── generator/ # 生成模块
+│ │ ├── init.py
+│ │ ├── llm_client.py # 大模型客户端（豆包/DeepSeek接口）
+│ │ └── prompt_builder.py # 提示词构建
+│ │
+│ ├── rag_chain.py # RAG主流程编排
+│ ├── config.py # 配置文件（模型参数/路径等）
+│ └── main.py # 程序入口（命令行交互）
+│
+├── data/ # 数据目录
+│ ├── public/ # 公开数据集
+│ │ ├── THUCNews/ # 清华新闻分类数据集（需自行下载）
+│ │ ├── LCQMC/ # 哈工大问句匹配数据集（需自行下载）
+│ │ └── README.md # 数据来源说明与引用
+│ │
+│ ├── knowledge_base/ # 自建知识库
+│ │ ├── course_materials/ # 课程教材与讲义（TXT/Markdown格式）
+│ │ ├── campus_rules/ # 校园规章制度
+│ │ └── lab_manuals/ # 实验室使用说明
+│ │
+│ ├── qa_pairs/ # 问答评测对
+│ │ └── qa_dataset.json # 问题-答案标注数据
+│ │
+│ ├── processed/ # 预处理后数据（程序自动生成）
+│ │ ├── train.json
+│ │ ├── valid.json
+│ │ └── test.json
+│ │
+│ └── README.md # 数据目录总体说明
+│
+├── docs/ # 文档目录
+│ ├── 课程设计报告.md # 完整课程设计报告
+│ ├── 选题说明.md # 选题说明文档
+│ ├── 方案设计.md # 系统方案设计文档
+│ └── 答辩PPT/ # 答辩演示文稿
+│
+├── prompt/ # AI工具提示词追溯目录
+│ ├── 01_选题调研/
+│ │ ├── PROMPT001_RAG原理讲解.md
+│ │ └── PROMPT002_技术路线讨论.md
+│ ├── 02_工具学习/
+│ │ ├── PROMPT003_LangChain入门.md
+│ │ └── PROMPT004_向量数据库选型.md
+│ ├── 03_代码开发/
+│ │ ├── PROMPT005_预处理程序生成.md
+│ │ └── PROMPT006_检索模块调试.md
+│ ├── 04_文档撰写/
+│ │ └── PROMPT007_报告大纲生成.md
+│ ├── 05_问题排查/
+│ │ └── PROMPT008_编码错误修复.md
+│ ├── 索引文件.json # 提示词索引（结构化元数据）
+│ └── 学习笔记.md # 学习笔记与反思
+│
+├── tests/ # 测试目录
+│ ├── test_preprocessor.py # 预处理模块测试
+│ ├── test_retriever.py # 检索模块测试
+│ └── test_end_to_end.py # 端到端集成测试
+│
+├── requirements.txt # Python依赖清单
+├── .gitignore # Git忽略文件配置
+├── setup.py # 项目安装脚本
 
-```text
-├── 选题说明.md          # 选题与目标
-├── 方案设计.md          # 系统方案设计
-├── 数据资源整理说明.md  # 数据资源规划（详细方案）
-├── 学习笔记.md          # Vibe Coding / Git / AI 工具学习笔记
-├── data/                # 数据集（原始数据 + 预处理特征）
-│   ├── raw/             # 原始图像数据（表面缺陷数据集）
-│   ├── processed/       # 预处理后图像 + 索引文件（index.csv）
-│   └── README.md        # 数据说明文档
-├── algorithms/          # 核心算法模块（三模块 + 训练产物）
-│   ├── feature_extraction.py   # 模块一：图像特征提取（HOG/LBP）
-│   ├── quality_detection.py    # 模块二：缺陷质量检测（分类模型）
-│   ├── process_optimization.py # 模块三：工艺参数优化（超参数调优）
-│   └── models/                 # 训练产物（模型文件 + 评估报告）
-├── backend/             # FastAPI 后端服务
-│   ├── main.py          # 应用入口
-│   ├── requirements.txt # 依赖清单
-│   └── app/             # 配置 + 服务层 + 路由层
-├── frontend/            # Vue3 前端（四大页面）
-│   ├── package.json     # 依赖与脚本
-│   ├── vite.config.js   # 构建 + /api 代理配置 
-│   └── src/
-│       ├── views/       # 检测大屏 / 检测分析 / 质量追溯 / 数据管理
-│       ├── components/  # 通用图表组件
-│       └── api/         # 后端接口封装
-├── tests/               # 单元测试（unittest）
-├── prompt/              # AI 交流提示词追溯记录
-├── task_plan.md         # 任务规划
-├── findings.md          # 调研发现
-└── progress.md          # 进度记录
- ```
-## 数据来源
 
-- 数据名称：Surface Defect Detection Dataset（表面缺陷检测数据集）
-- 来源：https://github.com/stephan-akermann/surface-defect-detection
-- 用途：训练模型分辨工件是合格还是有缺陷
-- 原始图片位置：`/data/raw`
-- 处理后图片位置：`/data/processed`
-##数据快速复现
-python data/preprocess.py      # 预处理 + 标签生成 + 划分
+## 快速开始
 
-##核心算法与后端
-对应课程三大技术方向，实现三个算法模块并封装为 FastAPI 后端服务（详见 backend/README.md）。
+### 环境要求
 
-三大算法模块
-
-图像特征提取	    工业大数据预处理与特征工程	     HOG/LBP 特征提取 + PCA 降维              提取128 维特征
-缺陷质量检测	     质量智能检测与控制            	随机森林（主，网格搜索）+ SVM/CNN 对比	     测试集准确率 ≥ 95%
-质量追溯与优化	  工艺追溯与参数优化	             特征关联分析 + 超参数网格搜索	           输出最优参数组合
-
-##后端接口
-cd backend && pip install -r requirements.txt
-uvicorn main:app --reload --host 0.0.0.0 --port 8000   # 文档 /docs
-要接口：POST /api/detect（单张图像检测）、POST /api/detect/batch（批量检测）、GET /api/stats（质量统计）、POST /api/optimize（参数优化）、GET /api/trace（检测追溯）。
-
-##前端（Vue3 + Element Plus + ECharts）
+| 要求 | 版本 |
+|------|------|
+| Python | 3.10+ |
+| 内存 | 8GB+ |
+| 存储 | 10GB+（含数据） |
+| GPU（可选） | 推荐NVIDIA GPU 8GB+，CPU模式也可运行 |
 
 
-缺陷检测大屏	     /api/stats /api/trace	         合格率/缺陷分布 + 实时检测滚动 + 质量趋势
-缺陷检测分析	     /api/detect /api/detect/batch	 单张/批量图片检测 + 检测结果展示 + 置信度显示
-质量追溯查询	     /api/trace	                     多条件组合检索 + 检测历史详情
-数据管理	前端      localStorage                   演示 CRUD	检测记录/工单信息 增删改查
-cd frontend && npm install
-npm run dev            # 前端 5173，经 /api 代理到后端 8000
-npm run build          # 生产构建输出 dist/
+### 安装步骤
 
-开发计划
+```bash
+# 1. 克隆项目
+git clone https://github.com/your-username/manufacturing-rag-qa.git
+cd manufacturing-rag-qa
 
+# 2. 创建虚拟环境（推荐）
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-一	               选题与需求设计	         选题说明、方案设计	                  ✅ 完成
-二	               数据准备与数据库设计    	数据集、预处理脚本、数据库设计	        ✅ 完成
-三	               核心算法与后端开发	       算法模块、后端接口	                  ⏳ 待开始
-四	               前端开发与系统联调	       前端代码、可运行 Demo             	⏳ 待开始
-五	               文档撰写与答辩准备	       设计报告、演示视频、答辩 PPT	        ⏳ 待开始
+# 3. 安装依赖
+pip install -r requirements.txt
+```
+依赖清单（requirements.txt）
+# 核心框架
+langchain>=0.3.0
+langchain-community>=0.3.0
 
+# 向量数据库
+chromadb>=0.5.0
+faiss-cpu>=1.8.0  # GPU: faiss-gpu
 
+# 嵌入模型
+sentence-transformers>=2.2.0
 
-## 数据预处理
+# 文档解析
+pypdf>=4.0.0
+python-docx>=1.1.0
+markdown>=3.5.0
+openpyxl>=3.1.0
 
-本项目对原始图像数据进行了以下预处理操作：
+# HTTP客户端（调用大模型API）
+requests>=2.31.0
 
-1. **尺寸统一**：将所有图像缩放至 224x224 像素，满足模型输入要求
-2. **格式转换**：将 .tif 格式转换为 .jpg 格式，减小存储空间
-3. **标签生成**：根据原始文件名中的关键词自动生成标签
-   - 包含 `defect` → 标签为 1（有缺陷）
-   - 包含 `ok` 或 `good` → 标签为 0（合格）
-   - 其他 → 标签为 -1（未知）
-4. **索引文件**：生成 `data/processed/index.csv`，记录每张图片的原始文件名、处理后文件名、标签和路径
+# 数据处理
+numpy>=1.24.0
+pandas>=2.0.0
 
-预处理脚本位于 `scripts/preprocess_data.py`，运行后数据输出至 `/data/processed` 目录。
+# 工具库
+tiktoken>=0.5.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+配置环境变量
+创建 .env 文件并配置大模型API密钥：
+# 豆包大模型配置（默认）
+DOUBAO_API_KEY=your_api_key_here
+DOUBAO_API_URL=https://ark.cn-beijing.volces.com/api/v3/chat/completions
+DOUBAO_MODEL=doubao-lite-32k
+
+# 或 DeepSeek 配置
+DEEPSEEK_API_KEY=your_api_key_here
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+DEEPSEEK_MODEL=deepseek-chat
+
+# 向量数据库路径
+VECTOR_DB_PATH=./data/vector_db/
+运行系统
+# 1. 预处理数据
+python src/main.py --preprocess
+
+# 2. 构建向量索引
+python src/main.py --build-index
+
+# 3. 启动问答交互
+python src/main.py --query "什么是智能制造？"
+
+# 4. 启动交互式命令行问答
+python src/main.py --interactive
+
+# 5. 启动Web界面（如已实现）
+使用示例
+交互式问答示例
+用户: 什么是智能制造？
+
+系统回答:
+智能制造是新一代信息技术与先进制造技术的深度融合，贯穿于设计、生产、
+管理、服务等制造活动的各个环节。其核心特征包括数字化、网络化、智能化，
+旨在实现制造过程的感知、分析、决策、执行的自适应与自优化。
+
+【引用来源】
+- 《制造智能导论》教材 第3章 第2节
+- 国家智能制造标准体系建设指南（2021版）
+- API调用示例
+- from src.rag_chain import RAGChain
+
+# 初始化RAG系统
+rag = RAGChain()
+
+# 提问并获取答案
+result = rag.query("如何解决数控机床的刀具磨损问题？")
+
+print(f"回答: {result['answer']}")
+print(f"引用来源: {result['sources']}")
+print(f"检索耗时: {result['retrieval_time_ms']}ms")
+print(f"生成耗时: {result['generation_time_ms']}ms")
+参考资料
+技术文档
+LangChain官方文档
+
+豆包大模型开发者文档
+
+ChromaDB文档
+
+学术参考
+Lewis, P., et al. "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." NeurIPS 2020.
+
+Gao, Y., et al. "Retrieval-Augmented Generation for Large Language Models: A Survey." arXiv:2312.10997, 2023.
+
+数据集来源
+THUCTC: http://thuctc.thunlp.org/
+
+LCQMC: https://github.com/liyongqi/Lcqmc
+
+许可证
+本项目仅供课程设计教学使用，未经许可不得用于商业用途。
+python src/main.py --web
