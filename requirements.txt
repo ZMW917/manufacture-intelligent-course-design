@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+# LPBF 熔池质量监测系统 —— Python 依赖清单（版本宽松，安装时自动解析兼容版本）
+# 用法：pip install -r requirements.txt
+fastapi
+uvicorn
+pydantic
+numpy
+pandas
+scikit-learn
+torch
+torchvision
+opencv-python
+Pillow
+joblib
+pytest
+httpx
+python-multipart
