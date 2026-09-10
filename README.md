@@ -1,43 +1,131 @@
-# 数据资源说明
+# 基于机器视觉与深度学习的激光增材制造（LPBF）熔池在线监测与成形质量智能预测系统
 
-本项目数据分两部分：**公开基准数据集**（真实工业数据，需自行下载）与**本地样例数据集**（合成数据，随仓库提交，供离线 demo 与自动化测试）。
+《制造智能技术》课程设计项目（智造24-1-28 邹明吾）。
 
-## 一、公开基准数据集（主数据来源）
+面向金属增材制造（激光粉末床熔融，LPBF）的质量控制场景，构建一套 B/S 架构的智能应用，对熔池图像与工艺/传感器数据进行采集、监测、预测与预警，实现"图像上传 → 熔池监测 → 成形质量预测 → 异常预警"的完整业务闭环。
 
-### 1. NIST AM-Bench 2022（增材制造基准）
-- **来源**：美国国家标准与技术研究院（NIST）Additive Manufacturing Benchmark 系列
-- **链接**：<https://www.nist.gov/ambench>
-- **说明**：AM-Bench 提供多组经标定的增材制造基准数据，其中 LPBF（激光粉末床熔融）挑战含 **熔池几何形貌、温度场与成形件性能（致密度/缺陷）** 的对应测量数据，是增材制造过程—结构—性能建模的权威基准。
-- **用途**：本项目熔池图像分类、工艺参数→致密度回归模型的训练/验证基准数据。
-- **获取方式**：访问 NIST AM-Bench 页面，按 LPBF 相关 Challenge 下载对应数据集；数据集较大，请勿直接提交至仓库。
+## 技术方向覆盖（对应《制造智能技术》课程专题）
 
-### 2. 公开 LPBF 熔池监测数据集（辅助）
-- **来源**：公开发表的 LPBF 原位监测数据集（Zenodo / 学术数据集仓库）
-- **检索入口**：<https://zenodo.org> 检索关键词 `LPBF melt pool monitoring dataset`；或通过魔搭 <https://modelscope.cn>、飞桨 AI Studio <https://aistudio.baidu.com> 检索"增材制造/熔池"数据集。
-- **说明**：此类数据集通常含熔池红外/高速相机图像与逐层传感器（温度、氧含量）时序，用于本项目传感器时序异常检测模块的验证。
+| 课程专题方向 | 本项目方法 | 系统作用 |
+|---|---|---|
+| 计算机视觉 / 机器视觉 | OpenCV 图像预处理、ROI 提取、增强 | 熔池图像清洗与特征可视化 |
+| 深度学习 | CNN（ResNet-18）图像缺陷/质量分类 | 图像级成形质量判定 |
+| 机器学习 | 随机森林、SVR 工艺参数回归 | 参数驱动的致密度/孔隙率预测 |
+| 数据挖掘 | 孤立森林 + 统计过程控制（SPC） | 传感器时序异常检测与预警 |
 
-## 二、本地样例数据集（随仓库提交）
+## 技术栈
 
-> ⚠️ 以下为 `scripts/generate_sample_data.py` **程序合成的模拟数据**，仅用于功能演示与自动化测试，**非真实企业/实验数据**。真实数据请按上文公开数据集说明获取。
+- **前端**：Vue 3 + Element Plus + ECharts
+- **后端**：Python 3.9+ + FastAPI
+- **数据库**：SQLite
+- **算法**：PyTorch、scikit-learn、OpenCV、NumPy、Pandas
+- **测试**：pytest
+- **Vibe Coding**：Claude Code（Harness）+ DeepSeek-v4（模型）
 
-| 文件/目录 | 说明 |
-|---|---|
-| `data/raw/images/` | 200 张合成熔池灰度图（64×64，含致密/气孔/裂纹三类形态） |
-| `data/raw/process_params.csv` | 200 条工艺参数记录（激光功率、扫描速度、层厚、扫描间距、能量密度、致密度、质量标签） |
-| `data/raw/sensor_timeseries.csv` | 6 个打印任务的熔池温度/氧含量时序（含 2 个注入异常任务） |
-| `data/processed/features.csv` | 预处理+特征工程+标准化后的参数特征表 |
-| `data/processed/sensor_features.csv` | 传感器时序按任务聚合的统计特征与 3σ 异常标记 |
+## 目录结构
 
-## 三、数据预处理
-
-预处理脚本：`scripts/preprocess.py`，流程：
-1. **缺失/异常值处理**：删除含缺失值样本，按 3σ 剔除离群工艺参数；
-2. **特征工程**：构造功率密度、线能量、能量密度对数等派生特征；
-3. **标准化**：对数值特征做 Z-score 标准化；
-4. **传感器聚合**：按打印任务提取均值/方差/极值等统计特征，并以 3σ 规则标记异常。
-
-复现方式：
-```bash
-python scripts/generate_sample_data.py   # 重新生成样例数据（可选）
-python scripts/preprocess.py             # 预处理，输出到 data/processed/
 ```
+├── README.md            # 项目说明（本文件）
+├── 选题说明.md          # 选题说明
+├── 方案设计.md          # 方案设计
+├── 学习笔记.md          # 学习笔记
+├── 选题汇总.md          # 61 个同学选题汇总（选题调研产物）
+├── requirements.txt     # Python 依赖清单
+├── conftest.py          # pytest 根配置（保证 import src.*）
+├── data/                # 数据（raw 原始样例 + processed 预处理后）
+├── prompt/              # AI 对话记录（JSON）
+├── src/                 # 后端与算法模块
+│   ├── config.py        #   全局配置（路径/标签/特征列）
+│   ├── database.py      #   SQLite 三张表 + 增查
+│   ├── schemas.py       #   Pydantic 请求模型
+│   ├── train.py         #   训练入口（python -m src.train）
+│   ├── main.py          #   FastAPI 应用（7 个接口）
+│   └── algorithms/      #   算法模块
+│       ├── image_preprocess.py   # OpenCV 图像预处理/ROI 提取
+│       ├── cnn_classifier.py     # CNN（ResNet-18）熔池图像分类
+│       ├── regression.py         # RF/SVR 工艺参数回归
+│       └── anomaly_detector.py   # 孤立森林 + SPC 异常检测
+├── frontend/            # 前端（Vue3 + Vite + Element Plus + ECharts）
+│   └── src/views/       #   熔池监测 / 质量预测 / 异常预警 / 历史记录
+├── tests/               # pytest 自动化测试
+├── models/              # 训练产物（cnn_model.pth / regressor.joblib）
+└── scripts/
+    ├── generate_sample_data.py   # 生成合成样例数据
+    ├── preprocess.py             # 数据预处理
+    └── run_backend.py            # 一键启动后端
+```
+
+## 数据说明
+
+数据集分两部分，详见 [data/README.md](data/README.md)：
+
+1. **公开基准数据集**（真实数据，需自行下载，不随仓库提交）：
+   - 主数据集：NIST AM-Bench 2022（增材制造基准，<https://www.nist.gov/ambench>），含 LPBF 熔池几何/温度与成形性能数据；
+   - 辅助数据集：公开 LPBF 熔池监测数据集（Zenodo / ModelScope / 飞桨 AI Studio 检索）。
+2. **本地样例数据集**（合成数据，随仓库提交，仅供离线 demo 与自动化测试）：由 `scripts/generate_sample_data.py` 生成，**非真实企业数据**。
+
+## 快速开始
+
+> 💡 **Windows 一键启动**：直接双击根目录的 `一键启动.bat`，脚本会自动检查依赖、训练模型（如缺失），并同时启动后端与前端两个服务窗口。
+
+### 0. 环境准备
+
+```bash
+# Python 3.9+，安装后端与算法依赖
+pip install -r requirements.txt
+
+# 前端依赖（首次）
+cd frontend && npm install && cd ..
+```
+
+### 1. 数据准备（可选，仓库已包含合成样例）
+
+```bash
+python scripts/generate_sample_data.py   # 生成合成样例数据
+python scripts/preprocess.py             # 预处理，输出 data/processed/
+```
+
+### 2. 训练模型
+
+```bash
+python -m src.train        # 训练 CNN + RF/SVR，产物写入 models/
+```
+
+### 3. 启动后端（FastAPI，端口 8000）
+
+```bash
+python scripts/run_backend.py
+# 或：uvicorn src.main:app --host 0.0.0.0 --port 8000
+# 自动文档：http://localhost:8000/docs
+```
+
+### 4. 启动前端（Vite，端口 5173）
+
+```bash
+cd frontend && npm run dev
+# 浏览器打开 http://localhost:5173
+```
+
+### 5. 运行测试
+
+```bash
+pytest tests/ -q
+```
+
+## 功能模块
+
+| 模块 | 后端接口 | 前端页面 |
+|---|---|---|
+| 熔池图像在线监测 | POST /api/classify | 熔池监测（上传图像 → CNN 分类 + ROI 回显） |
+| 工艺参数质量预测 | POST /api/predict | 质量预测（工艺参数 → RF/SVR 致密度/孔隙率） |
+| 传感器时序异常检测 | POST /api/anomaly | 异常预警（ECharts 时序 + 异常区间 + 预警等级） |
+| 历史记录查询 | GET /api/history/* | 历史记录（预测/图像记录分页） |
+
+## 进度
+
+- [x] 选题与方案设计（`选题说明.md` / `方案设计.md`）
+- [x] 数据资源整理（`data/`，含合成样例数据与预处理）
+- [x] 学习笔记与 AI 工具学习（`学习笔记.md` / `prompt/`）
+- [x] 详细开发（`src/` 后端与算法模块 + `frontend/` 前端 + `tests/` 测试，训练与测试全通过）
+- [ ] 集成调试与设计报告撰写
+- [ ] 演示视频与答辩 PPT
