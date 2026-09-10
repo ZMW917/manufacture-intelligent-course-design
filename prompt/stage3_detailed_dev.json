@@ -1,0 +1,42 @@
+[
+  {
+    "id": "S3-01",
+    "stage": "详细开发（设计契约）",
+    "date": "2026-09-04",
+    "tool": "Claude Code",
+    "model": "DeepSeek-v4",
+    "task": "将「详细开发」阶段的所有接口、数据 schema、目录结构、模型路径锁定为一份实现契约，供并行子代理一致对齐。",
+    "result_summary": "编写 findings/design_contract.md，锁定：3 个算法模块（CNN/回归/异常检测）的精确类与函数签名、SQLite 三张表结构、7 个后端 API 的请求/响应字段、前端 4 页面规范、测试规范与目录结构。同时创建 src/config.py 与 src/__init__.py 作为全局配置基础。",
+    "notes": "契约是并行实现不冲突的关键；同时探测确认环境已装 torch/torchvision/sklearn/fastapi/uvicorn/cv2/PIL/pytest，Node v24 + npm 11 可用。"
+  },
+  {
+    "id": "S3-02",
+    "stage": "详细开发（并行实现）",
+    "date": "2026-09-04",
+    "tool": "Claude Code（Workflow 编排 5 个 Sonnet 子代理）",
+    "model": "DeepSeek-v4",
+    "task": "按锁定契约并行实现：机器视觉+CNN、回归+异常检测、FastAPI 后端、Vue3 前端、测试与脚本，各子代理拥有独立文件所有权。",
+    "result_summary": "5 个 Sonnet 子代理并行完成全部代码：src/algorithms/（image_preprocess/cnn_classifier/regression/anomaly_detector）、src/（database/schemas/train/main）、frontend/（Vue3+Element Plus+ECharts 四页面）、tests/（8 个用例）、requirements.txt 与 scripts/run_backend.py，全部离线可运行。",
+    "notes": "子代理各自跑通本地验证；ResNet-18 用 weights=None 离线改造为 1 通道 3 分类，不下载预训练权重。"
+  },
+  {
+    "id": "S3-03",
+    "stage": "详细开发（集成调试）",
+    "date": "2026-09-04",
+    "tool": "Claude Code",
+    "model": "DeepSeek-v4",
+    "task": "审查 5 个子代理的产出，修复集成与质量缺陷。",
+    "result_summary": "修复三处问题：(1) train.py 训练回归模型后未调用 save() 导致模型从不落盘（关键 bug）；(2) SVR 默认 epsilon=0.1 远大于密度量级(std≈0.02)导致退化为近常数，改为目标 Z-score 标准化后反变换；(3) 孤立森林 contamination='auto' 在纯噪声序列误标 10~25% 的点导致所有任务都告警，改为固定 0.01 并重设分级阈值。",
+    "notes": "修复后异常检测对注入尖峰的 job0/job3 精确输出 interval [45,49]，正常 job 判为「正常」。"
+  },
+  {
+    "id": "S3-04",
+    "stage": "详细开发（训练与验证）",
+    "date": "2026-09-04",
+    "tool": "Claude Code",
+    "model": "DeepSeek-v4",
+    "task": "运行训练、自动化测试与端到端冒烟测试，验证完整业务闭环。",
+    "result_summary": "python -m src.train 训练完成：CNN train_acc=0.81/val_acc=0.78；RF/SVR 回归保存成功（RF 特征重要性中 energy_density_J_mm3 占 0.65，符合物理预期）。pytest 8 用例全过。TestClient 冒烟测试走通 health/classify/predict/anomaly/history/jobs 全部接口。",
+    "notes": "回归 R² 在合成数据上为负，因合成 density 方差极小(≈0.02)、信号弱，属数据特性而非 bug；换用 NIST AM-Bench 真实数据后预期改善。"
+  }
+]

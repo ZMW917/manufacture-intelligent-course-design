@@ -1,0 +1,32 @@
+[
+  {
+    "id": "S2-01",
+    "stage": "数据准备",
+    "date": "2026-09-04",
+    "tool": "Claude Code",
+    "model": "DeepSeek-v4",
+    "task": "为 LPBF 增材制造项目准备数据：生成一份可复现的合成熔池样例数据集（熔池灰度图像 + 工艺参数表 + 传感器时序，含质量标签），供离线 demo 与自动化测试。",
+    "result_summary": "编写 scripts/generate_sample_data.py，生成 200 张熔池图像、200 条工艺参数记录、6 个打印任务共 600 条传感器时序（含 2 个注入异常任务），标签分布 0/1/2=151/38/11。",
+    "notes": "合成数据明确标注为非真实企业数据；真实数据按 NIST AM-Bench 2022 获取。"
+  },
+  {
+    "id": "S2-02",
+    "stage": "数据预处理",
+    "date": "2026-09-04",
+    "tool": "Claude Code",
+    "model": "DeepSeek-v4",
+    "task": "编写数据预处理程序：缺失/异常值清洗、特征工程、标准化、传感器时序聚合与 3σ 异常标记。",
+    "result_summary": "编写 scripts/preprocess.py，输出 data/processed/features.csv（19 列特征）与 data/processed/sensor_features.csv（6 任务聚合特征，检出 2 个异常任务）。",
+    "notes": "预处理脚本可复现：python scripts/preprocess.py。"
+  },
+  {
+    "id": "S2-03",
+    "stage": "文档撰写",
+    "date": "2026-09-04",
+    "tool": "Claude Code",
+    "model": "DeepSeek-v4",
+    "task": "依据任务书与项目规格，撰写「选题说明.md」「方案设计.md」「学习笔记.md」「README.md」四份文档（Markdown 格式）。",
+    "result_summary": "完成四份文档：选题说明（题目/目标/技术方向/架构/数据来源/选题新颖性）、方案设计（需求分析/方案论证/规划/技术路线/计划安排/参考文献）、学习笔记（AI 工具学习/harness 与模型选型/git 原理/选题调研）、README（项目说明）。",
+    "notes": "文档由子代理基于锁定规格 spec.md 生成，关键字段与规格一致。"
+  }
+]
